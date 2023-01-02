@@ -21,4 +21,4 @@ dependencies {
 
 > The `xxx` above should be replaced with the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of Equator Utils.
 >
-> If you have already implemented **[Equator,](https://github.com/KrLite/Equator)** there's no need to implement **Equator Utils** again.
+> If you have already implemented **[Equator,](https://github.com/KrLite/Equator)** you can use `implementation "com.github.KrLite:Equator-Utils:xxx"` instead of including the lib.
