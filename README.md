@@ -10,7 +10,7 @@ The easiest way of implementing this library is to use **[JitPack.](https://jitp
 Add the followings to your `build.gradle:`
 
 ```groovy
-epositories {
+repositories {
 	maven { url 'https://jitpack.io' }
 }
 
