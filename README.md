@@ -1,7 +1,7 @@
 # Equator-Utils
 
 Equator Utils is the sub-library of [Equator.](https://github.com/KrLite/Equator)
-This library provides a set of utilities, not only can be used in rendering.
+This library provides a set of utilities, not only can be used in rendering but also in other common environments.
 
 ## Implementation
 
