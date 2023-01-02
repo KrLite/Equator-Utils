@@ -18,3 +18,5 @@ dependencies {
 	implementation include("com.github.KrLite:Equator-Utils:v1.0.4")
 }
 ```
+
+> If you have already implemented [Equator,](https://github.com/KrLite/Equator) it's fine to not use `include` for a slimmer package. In this case, you can use `implementation "com.github.KrLite:Equator-Utils:v1.0.4"` in your gradle.
