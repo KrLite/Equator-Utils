@@ -5,17 +5,27 @@ package net.krlite.equator.util;
  * <h3>Countdown in Milliseconds</h3>
  * A timer class that can be used to countdown and to
  * measure the time between two events.
- * @param origin	The origin time, in milliseconds.
- * @param lasting	The lasting time, in milliseconds.
  */
-public record Timer(long origin, long lasting) {
+public class Timer {
+	/**
+	 * The time to countdown, must be positive.
+	 */
+	public final long lasting;
+
+	/**
+	 * The time when the timer is started.
+	 */
+	private long origin;
+
 	/**
 	 * Creates a new timer with the origin time set to
 	 * the current system time, in milliseconds.
 	 * @param lasting	The lasting time, in milliseconds.
+	 *                  Will take the absolute value.
 	 */
 	public Timer(long lasting) {
-		this(System.currentTimeMillis(), lasting);
+		this.origin = System.currentTimeMillis();
+		this.lasting = Math.abs(lasting);
 	}
 
 	/**
@@ -61,11 +71,7 @@ public record Timer(long origin, long lasting) {
 		if (isDone()) {
 			runnable.run();
 			return true;
-		}
-
-		else {
-			return false;
-		}
+		} else return false;
 	}
 
 	/**
@@ -101,6 +107,7 @@ public record Timer(long origin, long lasting) {
 	 * 			time.
 	 */
 	public Timer reset() {
-		return new Timer(System.currentTimeMillis(), lasting);
+		this.origin = System.currentTimeMillis();
+		return this;
 	}
 }

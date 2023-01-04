@@ -6,104 +6,134 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <h2>Pusher</h2>
- * <h3>Consumer / Single Thread Supplier</h3>
- * A class works as a consumer and a supplier that allows
- * for a single thread to pull the value which pushed by
- * others.
- * @param ready	Indicates whether the value is ready to be
- *              pulled. The value is disposed after it is
- *              pulled.
+ * <h3>Atomic Operations</h3>
+ * An atomic class that can be used to set a disposable
+ * flag and to trigger or run a action in a thread-safe
+ * manner.
  */
-public record Pusher(@NotNull AtomicBoolean ready) {
+public class Pusher {
 	/**
-	 * Creates a new Pusher with a ready flag.
-	 * @param ready	The ready flag.
+	 * The disposable flag.
 	 */
-	public Pusher(boolean ready) {
-		this(new AtomicBoolean(ready));
+	private final @NotNull AtomicBoolean flag = new AtomicBoolean();
+
+	/**
+	 * Creates a new Pusher with a flag.
+	 * @param flag	The initial value of the disposable flag.
+	 */
+	public Pusher(boolean flag) {
+		this.flag.set(flag);
 	}
 
 	/**
-	 * Creates a new Pusher with a ready flag set to false.
+	 * Creates a new Pusher with a flag set to
+	 * <code>false</code>.
 	 */
 	public Pusher() {
 		this(false);
 	}
 
 	/**
-	 * Pushes the consumer, allows it to be pulled.
+	 * Pushes the flag to <code>true</code>.
 	 */
 	public void push() {
-		ready.set(true);
+		flag.set(true);
 	}
 
 	/**
-	 * Pushes the consumer, allows it to be pulled.
-	 * @param runnable	The runnable to be run after the
-	 *                  value is disposed.
+	 * Pushes the flag to <code>true</code>, then runs the
+	 * action.
+	 * @param action	The action to be run after the
+	 *                  value is pushed.
 	 */
-	public void push(@NotNull Runnable runnable) {
+	public void push(@NotNull Runnable action) {
 		push();
-		runnable.run();
+		action.run();
 	}
 
 	/**
-	 * Pulls the consumer, disposes the value.
-	 * @return	Whether the value is ready to be pulled.
-	 * 			The value is disposed after it is pulled.
+	 * Pulls and disposes the flag.
+	 * @return	Whether the flag is ready to be pulled.
+	 * 			<code>true</code> if any thread has
+	 * 			pushed the flag before last pull,
+	 * 			otherwise <code>false</code>.
 	 */
 	public boolean pull() {
-		return ready.get() && ready.getAndSet(false);
+		return flag.getAndSet(false);
 	}
 
 	/**
-	 * Runs the runnable after the supplier is
-	 * pulled. The runnable is not run if the
-	 * value is not ready to be pulled, and the
-	 * value is disposed after it is pulled.
-	 * @param runnable	The runnable to be run after the
+	 * Pulls and disposes the flag, then runs the action
+	 * if success.
+	 * @param action	The action to be run after the
 	 *                  value is disposed.
+	 * @return 	Whether the flag is ready to be pulled.
+	 * 			<code>true</code> if any thread has
+	 * 			pushed the flag before last pull,
+	 * 			otherwise <code>false</code>.
 	 */
-	public void run(@NotNull Runnable runnable) {
-		if (pull()) runnable.run();
+	public boolean pull(@NotNull Runnable action) {
+		boolean pulled = pull();
+		if (pulled) {
+			action.run();
+		}
+		return pulled;
 	}
 
 	/**
-	 * Short-circuits the runnable if the parameter
-	 * is <code>false</code>. The runnable only runs
-	 * if the value is ready to be pulled and the
-	 * parameter doesn't short-circuit the supplier.
-	 * The value is disposed after it is pulled.
-	 * @param or		The boolean to short-circuit
-	 *                  the supplier.
-	 * @param runnable	The runnable to be run after the
-	 *                  value is disposed.
+	 * Pulls and disposes the flag only if the
+	 * short-circuit condition is not met. Then runs the
+	 * action if success.
+	 * @param or		The <strong>OR</strong>
+	 *             	   	short-circuit condition.
+	 * @param action	The action to be run after the
+	 *                  flag is disposed.
 	 */
-	public void or(boolean or, @NotNull Runnable runnable) {
-		if (or || pull()) runnable.run();
+	public void or(boolean or, @NotNull Runnable action) {
+		if (or || pull()) {
+			action.run();
+		}
 	}
 
 	/**
-	 * Short-circuits the runnable if the parameter
-	 * is <code>true</code>. The runnable only runs
-	 * if the value is ready to be pulled and the
-	 * parameter doesn't short-circuit the supplier.
-	 * The value is disposed after it is pulled.
-	 * @param and		The boolean to short-circuit
-	 *            		the supplier.
-	 * @param runnable	The runnable to be run after the
-	 *                  value is disposed.
+	 * Pulls and disposes the flag only if the
+	 * short-circuit condition is not met. Then runs the
+	 * action.
+	 * @param and		The <strong>AND</strong>
+	 *             	   	short-circuit condition.
+	 * @param action	The action to be run after the
+	 *                  flag is disposed.
 	 */
-	public void and(boolean and, @NotNull Runnable runnable) {
-		if (and && pull()) runnable.run();
+	public void and(boolean and, @NotNull Runnable action) {
+		if (and && pull()) {
+			action.run();
+		}
 	}
 
 	/**
-	 * Pastes the pusher instance.
-	 * @return	A new pusher instance with the same
-	 * 			ready flag.
+	 * Pulls and disposes the flag, then runs the success
+	 * action if success, otherwise runs the failure
+	 * action.
+	 * @param success	The action to be run if
+	 *                  {@link #pull()} returns
+	 *                  <code>true</code>.
+	 * @param failure	The action to be run if
+	 *                  {@link #pull()} returns
+	 *                  <code>false</code>.
 	 */
-	public Pusher paste() {
-		return new Pusher(new AtomicBoolean(ready.get()));
+	public void safePull(@NotNull Runnable success, @NotNull Runnable failure) {
+		if (!pull(success)) {
+			failure.run();
+		}
+	}
+
+	/**
+	 * Accepts another {@link Pusher}'s flag and pulls
+	 * and disposes its flag.
+	 * @param another	The {@link Pusher} to be accepted.
+	 * @return			The old flag value.
+	 */
+	public boolean accept(@NotNull Pusher another) {
+		return flag.getAndSet(another.pull());
 	}
 }
