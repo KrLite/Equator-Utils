@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-	implementation include("com.github.KrLite:Equator-Utils:xxx")
+	implementation 'com.github.KrLite:Equator-Utils:xxx'
 }
 ```
 
