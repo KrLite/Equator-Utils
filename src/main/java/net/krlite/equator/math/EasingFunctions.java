@@ -9,28 +9,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EasingFunctions {
 	/**
-	 * Clamps the value between min and max.
-	 *
-	 * @param value The value to be clamped.
-	 * @param min   The minimum value.
-	 * @param max   The maximum value.
-	 * @return The clamped value.
-	 */
-	private static double clamp(double value, double min, double max) {
-		return Math.min(max, Math.max(value, min));
-	}
-
-	/**
-	 * Clamps the value to [0, 1].
-	 *
-	 * @param value The value to be clamped.
-	 * @return The clamped value.
-	 */
-	private static double clamp(double value) {
-		return clamp(value, 0, 1);
-	}
-
-	/**
 	 * Powers the value by an integer.
 	 *
 	 * @param value The dedicated value.
@@ -164,7 +142,7 @@ public class EasingFunctions {
 		 * @return The linear eased value.
 		 */
 		public static double ease(double progressAsPercentage, double origin, double shift) {
-			return shift * clamp(progressAsPercentage) + origin;
+			return shift * progressAsPercentage + origin;
 		}
 
 		/**
@@ -178,7 +156,7 @@ public class EasingFunctions {
 		 * @return The linear eased value.
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
-			return shift * clamp(progress / duration) + origin;
+			return shift * (progress / duration) + origin;
 		}
 	}
 
@@ -235,8 +213,8 @@ public class EasingFunctions {
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
 			return (progress /= (duration / 2)) < 1
-						   ? shift / 2 * clamp(pow(progress)) + origin
-						   : -shift / 2 * clamp((--progress) * (progress - 2) - 1) + origin;
+						   ? shift / 2 * pow(progress) + origin
+						   : -shift / 2 * ((--progress) * (progress - 2) - 1) + origin;
 		}
 
 		/**
@@ -250,7 +228,7 @@ public class EasingFunctions {
 		 * @return The quadratic in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return shift * clamp((progress /= duration) * progress) + origin;
+			return shift * (progress /= duration) * progress + origin;
 		}
 
 		/**
@@ -264,7 +242,7 @@ public class EasingFunctions {
 		 * @return The quadratic out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return -shift * clamp((progress /= duration) * (progress - 2)) + origin;
+			return -shift * (progress /= duration) * (progress - 2) + origin;
 		}
 	}
 
@@ -321,8 +299,8 @@ public class EasingFunctions {
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
 			return (progress /= (duration / 2)) < 1
-						   ? shift / 2 * clamp(pow(progress, 3)) + origin
-						   : -shift / 2 * clamp((progress -= 2) * pow(progress) + 2) + origin;
+						   ? shift / 2 * pow(progress, 3) + origin
+						   : -shift / 2 * ((progress -= 2) * pow(progress) + 2) + origin;
 		}
 
 		/**
@@ -336,7 +314,7 @@ public class EasingFunctions {
 		 * @return The cubic in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return shift * clamp((progress /= duration) * pow(progress)) + origin;
+			return shift * (progress /= duration) * pow(progress) + origin;
 		}
 
 		/**
@@ -350,7 +328,7 @@ public class EasingFunctions {
 		 * @return The cubic out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return -shift * clamp((progress = progress / duration - 1) * pow(progress) + 1) + origin;
+			return -shift * ((progress = progress / duration - 1) * pow(progress) + 1) + origin;
 		}
 	}
 
@@ -407,8 +385,8 @@ public class EasingFunctions {
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
 			return (progress /= (duration / 2)) < 1
-						   ? shift / 2 * clamp(pow(progress, 4)) + origin
-						   : -shift / 2 * clamp((progress -= 2) * pow(progress, 3) - 2) + origin;
+						   ? shift / 2 * pow(progress, 4) + origin
+						   : -shift / 2 * ((progress -= 2) * pow(progress, 3) - 2) + origin;
 		}
 
 		/**
@@ -422,7 +400,7 @@ public class EasingFunctions {
 		 * @return The quartic in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return shift * clamp((progress /= duration) * pow(progress, 3)) + origin;
+			return shift * (progress /= duration) * pow(progress, 3) + origin;
 		}
 
 		/**
@@ -436,7 +414,7 @@ public class EasingFunctions {
 		 * @return The quartic out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return -shift * clamp((progress = progress / duration - 1) * pow(progress, 3) - 1) + origin;
+			return -shift * ((progress = progress / duration - 1) * pow(progress, 3) - 1) + origin;
 		}
 	}
 
@@ -493,8 +471,8 @@ public class EasingFunctions {
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
 			return (progress /= (duration / 2)) < 1
-						   ? shift / 2 * clamp(pow(progress, 4)) + origin
-						   : -shift / 2 * clamp((progress -= 2) * pow(progress, 3) - 2) + origin;
+						   ? shift / 2 * pow(progress, 4) + origin
+						   : -shift / 2 * (progress -= 2) * pow(progress, 3) - 2 + origin;
 		}
 
 		/**
@@ -508,7 +486,7 @@ public class EasingFunctions {
 		 * @return The quintic in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return shift * clamp((progress /= duration) * pow(progress, 3)) + origin;
+			return shift * (progress /= duration) * pow(progress, 3) + origin;
 		}
 
 		/**
@@ -522,7 +500,7 @@ public class EasingFunctions {
 		 * @return The quintic out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return -shift * clamp((progress = progress / duration - 1) * pow(progress, 3) - 1) + origin;
+			return -shift * (progress = progress / duration - 1) * pow(progress, 3) - 1 + origin;
 		}
 	}
 
@@ -578,7 +556,7 @@ public class EasingFunctions {
 		 * @return The sinusoidal eased value.
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
-			return -shift / 2 * Math.cos(Math.PI * clamp(progress / duration) - 1) + origin;
+			return -shift / 2 * Math.cos(Math.PI * progress / duration - 1) + origin;
 		}
 
 		/**
@@ -592,7 +570,7 @@ public class EasingFunctions {
 		 * @return The sinusoidal in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return -shift * (Math.cos(clamp(progress / duration) * (Math.PI / 2)) - 1) + origin;
+			return -shift * (Math.cos(progress / duration) * (Math.PI / 2) - 1) + origin;
 		}
 
 		/**
@@ -606,7 +584,7 @@ public class EasingFunctions {
 		 * @return The sinusoidal out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return shift * Math.cos(clamp(progress / duration) * (Math.PI / 2)) + origin;
+			return shift * Math.cos(progress / duration) * (Math.PI / 2) + origin;
 		}
 	}
 
@@ -667,8 +645,8 @@ public class EasingFunctions {
 						   : progress == duration
 									 ? origin + shift
 									 : (progress /= (duration / 2)) < 1
-											   ? shift / 2 * clamp(Math.pow(2, 10 * (progress - 1))) + origin
-											   : shift / 2 * clamp(-Math.pow(2, -10 * --progress) + 2) + origin;
+											   ? shift / 2 * Math.pow(2, 10 * (progress - 1)) + origin
+											   : shift / 2 * -Math.pow(2, -10 * --progress) + 2 + origin;
 		}
 
 		/**
@@ -682,7 +660,7 @@ public class EasingFunctions {
 		 * @return The exponential in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return progress == 0 ? origin : shift * clamp(Math.pow(2, 10 * (progress / duration - 1))) + origin;
+			return progress == 0 ? origin : shift * Math.pow(2, 10 * (progress / duration - 1)) + origin;
 		}
 
 		/**
@@ -696,7 +674,7 @@ public class EasingFunctions {
 		 * @return The exponential out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return progress == duration ? origin + shift : shift * clamp(-Math.pow(2, -10 * progress / duration) + 1) + origin;
+			return progress == duration ? origin + shift : shift * (-Math.pow(2, -10 * progress / duration) + 1) + origin;
 		}
 	}
 
@@ -753,8 +731,8 @@ public class EasingFunctions {
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
 			return (progress /= (duration / 2)) < 1
-						   ? -shift / 2 * clamp(Math.sqrt(1 - pow(progress)) - 1) + origin
-						   : shift / 2 * clamp(Math.sqrt(1 - (progress -= 2) * progress) + 1) + origin;
+						   ? -shift / 2 * (Math.sqrt(1 - pow(progress)) - 1) + origin
+						   : shift / 2 * (Math.sqrt(1 - (progress -= 2) * progress) + 1) + origin;
 		}
 
 		/**
@@ -768,7 +746,7 @@ public class EasingFunctions {
 		 * @return The circular in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return -shift * clamp(Math.sqrt(1 - (progress /= duration) * progress) - 1) + origin;
+			return -shift * (Math.sqrt(1 - (progress /= duration) * progress) - 1) + origin;
 		}
 
 		/**
@@ -782,7 +760,7 @@ public class EasingFunctions {
 		 * @return The circular out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return shift * clamp(Math.sqrt(1 - (progress = progress / duration - 1) * progress)) + origin;
+			return shift * Math.sqrt(1 - (progress = progress / duration - 1) * progress) + origin;
 		}
 	}
 
