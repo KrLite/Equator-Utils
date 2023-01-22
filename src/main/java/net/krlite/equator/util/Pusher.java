@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * <h2>Pusher</h2>
- * <h3>Atomic Operations</h3>
  * An atomic class that can be used to set a disposable
  * flag and to trigger or run a action in a thread-safe
  * manner.
