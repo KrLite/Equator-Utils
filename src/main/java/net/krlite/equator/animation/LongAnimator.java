@@ -1,17 +1,15 @@
 package net.krlite.equator.animation;
 
-import net.krlite.equator.animation.base.ValueAnimator;
+import net.krlite.equator.animation.core.BasicAnimator;
 
-public class LongAnimator extends ValueAnimator<Long> {
+public class LongAnimator implements BasicAnimator<Long> {
 	private final DoubleAnimator animator;
 
 	public LongAnimator(long start, long end, double delta) {
-		super(start, end, delta);
 		animator = new DoubleAnimator(start, end, delta);
 	}
 
 	public LongAnimator(long start, long end) {
-		super(start, end);
 		animator = new DoubleAnimator(start, end);
 	}
 
@@ -21,18 +19,16 @@ public class LongAnimator extends ValueAnimator<Long> {
 
 	@Override
 	public Long queue() {
-		return value = animator.queue().longValue();
+		return animator.queue().longValue();
 	}
 
 	@Override
 	public void forward() {
-		super.forward();
 		animator.forward();
 	}
 
 	@Override
 	public void backward() {
-		super.backward();
 		animator.backward();
 	}
 

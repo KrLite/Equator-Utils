@@ -3,7 +3,7 @@ package net.krlite.equator.animation.base;
 import net.krlite.equator.animation.core.BasicAnimator;
 
 @SuppressWarnings("allJavadoc")
-public abstract class ValueAnimator<A extends Number> implements BasicAnimator<A> {
+public abstract class ValueAnimator<A> implements BasicAnimator<A> {
 	protected final A start, end;
 	protected A value, target;
 	protected final double delta;
