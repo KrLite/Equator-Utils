@@ -33,4 +33,9 @@ public abstract class ValueAnimator<A extends Number> implements BasicAnimator<A
 	public final boolean isTimeBasedAnimationEnabled() {
 		return !timer.isStepping();
 	}
+
+	@Override
+	public boolean isFinished() {
+		return timer.isFinished();
+	}
 }

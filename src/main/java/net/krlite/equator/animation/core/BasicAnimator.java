@@ -43,4 +43,13 @@ public interface BasicAnimator<A> {
 	 * 			Otherwise <code>false</code>.
 	 */
 	boolean isTimeBasedAnimationEnabled();
+
+	/**
+	 * Checks if the animator has finished its
+	 * animation.
+	 * @return	<code>true</code> if the animator has
+	 * 			finished its animation.
+	 * 			Otherwise <code>false</code>.
+	 */
+	boolean isFinished();
 }

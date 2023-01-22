@@ -1,10 +1,8 @@
 package net.krlite.equator.util;
 
-import net.krlite.equator.core.Operatable;
 import net.krlite.equator.core.OperatableVoid;
 
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * <h2>Timer</h2>
@@ -150,7 +148,7 @@ public class Timer implements OperatableVoid<Timer> {
 	 * 					otherwise <code>false</code>.
 	 */
 	public boolean run(Runnable runnable) {
-		if (isDone()) {
+		if (isFinished()) {
 			runnable.run();
 			return true;
 		} else return false;
@@ -178,7 +176,7 @@ public class Timer implements OperatableVoid<Timer> {
 	 * 			down.
 	 * 			otherwise <code>false</code>.
 	 */
-	public boolean isDone() {
+	public boolean isFinished() {
 		return queueElapsed() > lasting;
 	}
 
