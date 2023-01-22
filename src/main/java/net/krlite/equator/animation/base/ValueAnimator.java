@@ -15,7 +15,7 @@ public abstract class ValueAnimator<A> implements BasicAnimator<A> {
 	}
 
 	public ValueAnimator(A start, A end) {
-		this(start, end, 0.1);
+		this(start, end, 0.075);
 	}
 
 	@Override

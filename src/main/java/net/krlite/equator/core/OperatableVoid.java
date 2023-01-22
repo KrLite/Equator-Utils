@@ -2,6 +2,6 @@ package net.krlite.equator.core;
 
 import java.util.function.Consumer;
 
-public interface OperatableVoid<C> {
-	C operate(Consumer<C> operation);
+public interface OperatableVoid<T, R> {
+	R operate(Consumer<T> operation);
 }

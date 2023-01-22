@@ -9,7 +9,7 @@ import java.util.function.Consumer;
  * A timer class that can be used to countdown and to
  * measure the time between two events.
  */
-public class Timer implements OperatableVoid<Timer> {
+public class Timer implements OperatableVoid<Timer, Timer> {
 	/**
 	 * The time to countdown, must be positive.
 	 */
