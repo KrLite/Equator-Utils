@@ -1,28 +1,31 @@
 package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.base.ValueAnimator;
-import net.krlite.equator.math.EasingFunctions;
 
 public class FloatAnimator extends ValueAnimator<Float> {
-	public FloatAnimator(float start, float end, long lasting) {
-		super(start, end, lasting);
+	public FloatAnimator(float start, float end, double delta) {
+		super(start, end, delta);
 	}
 
-	public FloatAnimator(float end, long lasting) {
-		this(0, end, lasting);
+	public FloatAnimator(float start, float end) {
+		super(start, end);
 	}
 
-	public FloatAnimator(long lasting) {
-		this(lasting, lasting);
+	public FloatAnimator(float end) {
+		this(0, end);
 	}
 
 	@Override
 	public Float queue() {
-		return (float) EasingFunctions.Sinusoidal.ease(timer, end);
+		return value += (target - value) * (float) delta;
 	}
 
 	@Override
-	public Float reverted() {
-		return timer.getLasting() - queue();
+	public boolean isFinished() {
+		return Math.abs(target - value) < 0.001;
+	}
+
+	public boolean isNearFinished() {
+		return Math.abs(target - value) < 0.1;
 	}
 }

@@ -1,28 +1,43 @@
 package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.base.ValueAnimator;
-import net.krlite.equator.math.EasingFunctions;
 
 public class IntegerAnimator extends ValueAnimator<Integer> {
-	public IntegerAnimator(int start, int end, long lasting) {
-		super(start, end, lasting);
+	private final DoubleAnimator animator;
+
+	public IntegerAnimator(int start, int end, double delta) {
+		super(start, end, delta);
+		animator = new DoubleAnimator(start, end, delta);
 	}
 
-	public IntegerAnimator(int end, long lasting) {
-		this(0, end, lasting);
+	public IntegerAnimator(int start, int end) {
+		super(start, end);
+		animator = new DoubleAnimator(start, end);
 	}
 
-	public IntegerAnimator(long lasting) {
-		this(Math.toIntExact(lasting), lasting);
+	public IntegerAnimator(int end) {
+		this(0, end);
 	}
 
 	@Override
 	public Integer queue() {
-		return (int) EasingFunctions.Sinusoidal.ease(timer, end);
+		return value = animator.queue().intValue();
 	}
 
 	@Override
-	public Integer reverted() {
-		return Math.toIntExact(timer.getLasting() - queue());
+	public void forward() {
+		super.forward();
+		animator.forward();
+	}
+
+	@Override
+	public void backward() {
+		super.backward();
+		animator.backward();
+	}
+
+	@Override
+	public boolean isFinished() {
+		return animator.isNearFinished();
 	}
 }

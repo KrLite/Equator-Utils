@@ -12,37 +12,9 @@ public interface BasicAnimator<A> {
 	 */
 	A queue();
 
-	/**
-	 * Reverts the value.
-	 * @return	The reverted value.
-	 */
-	A reverted();
+	void forward();
 
-	/**
-	 * Resets the animator's value to its
-	 * starting value.
-	 */
-	void reset();
-
-	/**
-	 * Enables time based mode.
-	 * The time based mode should be disabled by
-	 * default.
-	 */
-	void enableTimeBasedAnimation();
-
-	/**
-	 * Disables time based mode.
-	 */
-	void disableTimeBasedAnimation();
-
-	/**
-	 * Checks if the animator is in time based mode.
-	 * @return	<code>true</code> if the animator is
-	 * 			in time based mode.
-	 * 			Otherwise <code>false</code>.
-	 */
-	boolean isTimeBasedAnimationEnabled();
+	void backward();
 
 	/**
 	 * Checks if the animator has finished its

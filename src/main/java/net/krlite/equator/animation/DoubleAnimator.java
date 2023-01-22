@@ -1,28 +1,31 @@
 package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.base.ValueAnimator;
-import net.krlite.equator.math.EasingFunctions;
 
 public class DoubleAnimator extends ValueAnimator<Double> {
-	public DoubleAnimator(double start, double end, long lasting) {
-		super(start, end, lasting);
+	public DoubleAnimator(double start, double end, double delta) {
+		super(start, end, delta);
 	}
 
-	public DoubleAnimator(double end, long lasting) {
-		this(0, end, lasting);
+	public DoubleAnimator(double start, double end) {
+		super(start, end);
 	}
 
-	public DoubleAnimator(long lasting) {
-		this(lasting, lasting);
+	public DoubleAnimator(double end) {
+		this(0, end);
 	}
 
 	@Override
 	public Double queue() {
-		return EasingFunctions.Sinusoidal.ease(timer, end);
+		return value += (target - value) * delta;
 	}
 
 	@Override
-	public Double reverted() {
-		return timer.getLasting() - queue();
+	public boolean isFinished() {
+		return Math.abs(target - value) < 0.001;
+	}
+
+	public boolean isNearFinished() {
+		return Math.abs(target - value) < 0.1;
 	}
 }

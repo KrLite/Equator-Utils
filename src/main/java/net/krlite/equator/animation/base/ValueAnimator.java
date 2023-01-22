@@ -1,41 +1,30 @@
 package net.krlite.equator.animation.base;
 
 import net.krlite.equator.animation.core.BasicAnimator;
-import net.krlite.equator.util.Timer;
 
 @SuppressWarnings("allJavadoc")
 public abstract class ValueAnimator<A extends Number> implements BasicAnimator<A> {
 	protected final A start, end;
-	protected final Timer timer;
+	protected A value, target;
+	protected final double delta;
 
-	public ValueAnimator(A start, A end, long lasting) {
-		this.start = start;
-		this.end = end;
-		this.timer = new Timer(lasting).operate(Timer::enterStepping);
+	public ValueAnimator(A start, A end, double delta) {
+		this.value = this.start = start;
+		this.target = this.end = end;
+		this.delta = Math.max(0, Math.min(1, delta));
+	}
+
+	public ValueAnimator(A start, A end) {
+		this(start, end, 0.1);
 	}
 
 	@Override
-	public final void reset() {
-		timer.reset();
+	public void forward() {
+		target = end;
 	}
 
 	@Override
-	public final void enableTimeBasedAnimation() {
-		timer.quitStepping();
-	}
-
-	@Override
-	public final void disableTimeBasedAnimation() {
-		timer.enterStepping();
-	}
-
-	@Override
-	public final boolean isTimeBasedAnimationEnabled() {
-		return !timer.isStepping();
-	}
-
-	@Override
-	public boolean isFinished() {
-		return timer.isFinished();
+	public void backward() {
+		target = start;
 	}
 }
