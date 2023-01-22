@@ -195,7 +195,7 @@ public class Timer implements OperatableVoid<Timer, Timer> {
 	 * time.
 	 */
 	public void reset() {
-		this.origin = SystemClock.queue();
+		this.origin = SystemClock.queueElapsed();
 	}
 
 	@Override
