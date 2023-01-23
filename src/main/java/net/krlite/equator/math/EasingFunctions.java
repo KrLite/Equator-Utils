@@ -46,21 +46,20 @@ public class EasingFunctions {
 			functions.entrySet().iterator().forEachRemaining(entry -> {
 				int weight = entry.getKey();
 				entry.setValue((p, o, s, d) -> {
-					if (p / d * totalWeight.get() >= lastSequenced.get() &&
-								(p / d * totalWeight.get() < lastSequenced.get() + weight || p == d))
-						return entry.getValue().apply(p - (double) lastSequenced.getAndAdd(weight) / totalWeight.get(), o, s, (double) weight / totalWeight.get());
+					double current = p / d;
+					if (current * totalWeight.get() >= lastSequenced.get() &&
+								(current * totalWeight.get() < lastSequenced.get() + weight || current == 1))
+						return entry.getValue().apply(current * totalWeight.get() - lastSequenced.getAndAdd(weight), o, s, weight);
 					else return QuadDoubleFunction.NONE.apply(p, o, s, d);
 				});
 			});
 		}
 
 		private QuadDoubleFunction current(double percentage) {
-			AtomicLong totalWeight = new AtomicLong(functions.keySet().stream().mapToLong(Integer::longValue).sum());
+			AtomicLong totalWeight = new AtomicLong(0);
 			final int weight = (int) (percentage * totalWeight.get());
-			return functions.entrySet().stream().filter(entry -> {
-				totalWeight.addAndGet(-entry.getKey());
-				return totalWeight.get() <= totalWeight.get() - weight;
-			}).findFirst().map(Map.Entry::getValue).orElse(QuadDoubleFunction.NONE);
+			return functions.entrySet().stream().filter(entry -> totalWeight.addAndGet(entry.getKey()) >= weight)
+						   .findFirst().map(Map.Entry::getValue).orElse(QuadDoubleFunction.NONE);
 		}
 
 		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
