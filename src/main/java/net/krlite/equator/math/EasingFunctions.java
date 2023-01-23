@@ -60,6 +60,11 @@ public class EasingFunctions {
 			return this;
 		}
 
+		public Combined appendNegate(int weight, @NotNull QuadDoubleFunction function) {
+			functions.put(weight, (p, o, s, d) -> function.apply(p, o, -s, d));
+			return this;
+		}
+
 		public double apply(double progress, double origin, double shift, double duration) {
 			return current(progress / duration).apply(progress, origin, shift, duration);
 		}
