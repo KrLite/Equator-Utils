@@ -82,7 +82,7 @@ public class EasingFunctions {
 		}
 
 		public Combined appendNegate(int weight, @NotNull QuadDoubleFunction function) {
-			return append(weight, (p, o, s, d) -> function.apply(p, o, -s, d));
+			return append(weight, (p, o, s, d) -> function.apply(p, s, -s, d));
 		}
 
 		public double apply(double progress, double origin, double shift, double duration) {
