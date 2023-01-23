@@ -4,6 +4,12 @@ import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 /**
  * <h2>Easing Functions</h2>
  * A class that provides different kinds of easing functions.
@@ -14,7 +20,7 @@ public class EasingFunctions {
 	 *
 	 * @param value The dedicated value.
 	 * @param exp   The power.
-	 * @return The powered value.
+	 * @return 		The powered value.
 	 */
 	private static double pow(double value, int exp) {
 		return Math.pow(value, exp);
@@ -24,7 +30,7 @@ public class EasingFunctions {
 	 * Powers the value by 2.
 	 *
 	 * @param value The dedicated value.
-	 * @return The powered value.
+	 * @return 		The powered value.
 	 */
 	private static double pow(double value) {
 		return pow(value, 2);
@@ -34,30 +40,45 @@ public class EasingFunctions {
 	 * Sinusoidal reciprocating function based on the
 	 * system time, with a period of 1 second.
 	 *
-	 * @return The sinusoidal reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The sinusoidal reciprocating value.
 	 */
+	public static double sin(double speed) {
+		return Math.sin(SystemClock.queueElapsed() * 0.001 * speed);
+	}
+
 	public static double sin() {
-		return Math.sin(SystemClock.queueElapsed() / 1000.0);
+		return sin(1);
 	}
 
 	/**
 	 * Cosine reciprocating function based on the
 	 * system time, with a period of 1 second.
 	 *
-	 * @return The cosine reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The cosine reciprocating value.
 	 */
+	public static double cos(double speed) {
+		return Math.cos(SystemClock.queueElapsed() * 0.001 * speed);
+	}
+
 	public static double cos() {
-		return Math.cos(SystemClock.queueElapsed() / 1000.0);
+		return cos(1);
 	}
 
 	/**
 	 * Tangent reciprocating function based on the
 	 * system time, with a period of 1 second.
 	 *
-	 * @return The tangent reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The tangent reciprocating value.
 	 */
+	public static double tan(double speed) {
+		return Math.tan(SystemClock.queueElapsed() * 0.001 * speed);
+	}
+
 	public static double tan() {
-		return Math.tan(SystemClock.queueElapsed() / 1000.0);
+		return tan(1);
 	}
 
 	/**
@@ -65,10 +86,15 @@ public class EasingFunctions {
 	 * value) based on the system time, with a period
 	 * of 1 second.
 	 *
-	 * @return The sinusoidal reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The sinusoidal reciprocating value.
 	 */
+	public static double sinPositive(double speed) {
+		return Math.abs(sin(speed));
+	}
+
 	public static double sinPositive() {
-		return Math.abs(sin());
+		return sinPositive(1);
 	}
 
 	/**
@@ -76,10 +102,15 @@ public class EasingFunctions {
 	 * based on the system time, with a period of 1
 	 * second.
 	 *
-	 * @return The cosine reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The cosine reciprocating value.
 	 */
+	public static double cosPositive(double speed) {
+		return Math.abs(cos(speed));
+	}
+
 	public static double cosPositive() {
-		return Math.abs(cos());
+		return cosPositive(1);
 	}
 
 	/**
@@ -87,10 +118,15 @@ public class EasingFunctions {
 	 * in [0, 1]) based on the system time, with a
 	 * period of 1 second.
 	 *
-	 * @return The sinusoidal reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The sinusoidal reciprocating value.
 	 */
+	public static double sinNormal(double speed) {
+		return sin(speed) / 2 + 0.5;
+	}
+
 	public static double sinNormal() {
-		return sin() / 2 + 0.5;
+		return sinNormal(1);
 	}
 
 	/**
@@ -98,10 +134,15 @@ public class EasingFunctions {
 	 * [0, 1]) based on the system time, with a period
 	 * of 1 second.
 	 *
-	 * @return The cosine reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The cosine reciprocating value.
 	 */
+	public static double cosNormal(double speed) {
+		return cos(speed) / 2 + 0.5;
+	}
+
 	public static double cosNormal() {
-		return cos() / 2 + 0.5;
+		return cosNormal(1);
 	}
 
 	/**
@@ -109,10 +150,63 @@ public class EasingFunctions {
 	 * divided by 1) based on the system time, with a
 	 * period of 1 second.
 	 *
-	 * @return The tangent reciprocating value.
+	 * @param speed The speed of the reciprocation.
+	 * @return 		The tangent reciprocating value.
 	 */
+	public static double tanReciprocal(double speed) {
+		return 1 / tan(speed);
+	}
+
 	public static double tanReciprocal() {
-		return 1 / tan();
+		return tanReciprocal(1);
+	}
+
+	public class Combined {
+		protected interface QuadDoubleFunction {
+			double apply(double a, double b, double c, double d);
+		}
+
+		protected static final QuadDoubleFunction NONE = (a, b, c, d) -> 0;
+
+		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
+
+		private QuadDoubleFunction current(double percentage) {
+			AtomicInteger totalWeight = new AtomicInteger(functions.keySet().stream().reduce(0, Integer::sum));
+			final int weight = (int) (percentage * totalWeight.get());
+			return functions.entrySet().stream().filter(entry -> {
+				totalWeight.addAndGet(-entry.getKey());
+				return totalWeight.get() <= weight;
+			}).findFirst().map(Map.Entry::getValue).orElse(NONE);
+		}
+
+		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
+			this.functions = functions;
+		}
+
+		public Combined() {
+			this(new HashMap<>());
+		}
+
+		public Combined add(int weight, @NotNull QuadDoubleFunction function) {
+			functions.put(weight, function);
+			return this;
+		}
+
+		public double func(double progress, double origin, double shift, double duration) {
+			return current(progress / duration).apply(progress, origin, shift, duration);
+		}
+
+		public double func(double percentage) {
+			return func(percentage, 0, 1, 1);
+		}
+
+		public double func(Timer timer, double shift) {
+			return func(timer.queue(), 0, shift, timer.getLasting());
+		}
+
+		public double func(Timer timer) {
+			return func(timer, 1);
+		}
 	}
 
 	/**
@@ -137,13 +231,13 @@ public class EasingFunctions {
 		 * Linear easing function, a simple version of
 		 * {@link #ease(double, double, double, double) easeLinear.}
 		 *
-		 * @param progressAsPercentage Current progress as percentage value between zero and one.
-		 * @param origin               The original value.
-		 * @param shift                The distance to shift the value.
+		 * @param percentage 	Current progress as percentage value between zero and one.
+		 * @param origin		The original value.
+		 * @param shift			The distance to shift the value.
 		 * @return The linear eased value.
 		 */
-		public static double ease(double progressAsPercentage, double origin, double shift) {
-			return shift * progressAsPercentage + origin;
+		public static double ease(double percentage, double origin, double shift) {
+			return shift * percentage + origin;
 		}
 
 		/**
