@@ -7,14 +7,81 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  * <h2>Easing Functions</h2>
  * A class that provides different kinds of easing functions.
  */
 public class EasingFunctions {
+	protected interface MultiFunctionable extends Cloneable {
+		double apply(double progress, double origin, double shift, double duration);
+
+		default double apply(double percentage) {
+			return apply(percentage, 0, 1, 1);
+		}
+
+		default double apply(Timer timer, double shift) {
+			return apply(timer.queue(), 0, shift, timer.getLasting());
+		}
+
+		default double apply(Timer timer) {
+			return apply(timer, 1);
+		}
+	}
+
+	protected interface QuadDoubleFunction {
+		double apply(double a, double b, double c, double d);
+	}
+
+	protected static final QuadDoubleFunction NONE = (p, o, s, d) -> 0;
+
+	public static class Combined implements MultiFunctionable {
+		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
+
+		private QuadDoubleFunction current(double percentage) {
+			AtomicInteger totalWeight = new AtomicInteger(functions.keySet().stream().reduce(0, Integer::sum));
+			final int weight = (int) (percentage * totalWeight.get());
+			return functions.entrySet().stream().filter(entry -> {
+				totalWeight.addAndGet(-entry.getKey());
+				return totalWeight.get() <= weight;
+			}).findFirst().map(Map.Entry::getValue).orElse(NONE);
+		}
+
+		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
+			this.functions = functions;
+		}
+
+		public Combined() {
+			this(new HashMap<>());
+		}
+
+		public Combined append(int weight, @NotNull QuadDoubleFunction function) {
+			functions.put(weight, function);
+			return this;
+		}
+
+		public double apply(double progress, double origin, double shift, double duration) {
+			return current(progress / duration).apply(progress, origin, shift, duration);
+		}
+	}
+
+	public static class Concurred implements MultiFunctionable {
+		private final @NotNull QuadDoubleFunction functionFirst, functionSecond;
+
+		public Concurred(@NotNull QuadDoubleFunction functionFirst, @NotNull QuadDoubleFunction functionSecond) {
+			this.functionFirst = functionFirst;
+			this.functionSecond = functionSecond;
+		}
+
+		public Concurred(@NotNull QuadDoubleFunction function) {
+			this(function, (p, o, s, d) -> function.apply(d - p, o, s, d));
+		}
+
+		public double apply(double progress, double origin, double shift, double duration) {
+			return functionFirst.apply(progress, origin, shift, duration) + functionSecond.apply(progress, origin, shift, duration);
+		}
+	}
+
 	/**
 	 * Powers the value by an integer.
 	 *
@@ -161,53 +228,6 @@ public class EasingFunctions {
 		return tanReciprocal(1);
 	}
 
-	public class Combined {
-		protected interface QuadDoubleFunction {
-			double apply(double a, double b, double c, double d);
-		}
-
-		protected static final QuadDoubleFunction NONE = (a, b, c, d) -> 0;
-
-		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
-
-		private QuadDoubleFunction current(double percentage) {
-			AtomicInteger totalWeight = new AtomicInteger(functions.keySet().stream().reduce(0, Integer::sum));
-			final int weight = (int) (percentage * totalWeight.get());
-			return functions.entrySet().stream().filter(entry -> {
-				totalWeight.addAndGet(-entry.getKey());
-				return totalWeight.get() <= weight;
-			}).findFirst().map(Map.Entry::getValue).orElse(NONE);
-		}
-
-		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
-			this.functions = functions;
-		}
-
-		public Combined() {
-			this(new HashMap<>());
-		}
-
-		public Combined add(int weight, @NotNull QuadDoubleFunction function) {
-			functions.put(weight, function);
-			return this;
-		}
-
-		public double func(double progress, double origin, double shift, double duration) {
-			return current(progress / duration).apply(progress, origin, shift, duration);
-		}
-
-		public double func(double percentage) {
-			return func(percentage, 0, 1, 1);
-		}
-
-		public double func(Timer timer, double shift) {
-			return func(timer.queue(), 0, shift, timer.getLasting());
-		}
-
-		public double func(Timer timer) {
-			return func(timer, 1);
-		}
-	}
 
 	/**
 	 * Linear easing function.
