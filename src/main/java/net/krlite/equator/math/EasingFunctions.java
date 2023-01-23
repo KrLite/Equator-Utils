@@ -1,12 +1,13 @@
 package net.krlite.equator.math;
 
+import net.krlite.equator.util.Pusher;
 import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * <h2>Easing Functions</h2>
@@ -29,22 +30,37 @@ public class EasingFunctions {
 		}
 	}
 
+	@FunctionalInterface
 	public interface QuadDoubleFunction {
 		double apply(double a, double b, double c, double d);
-	}
 
-	protected static final QuadDoubleFunction NONE = (p, o, s, d) -> 0;
+		QuadDoubleFunction NONE = (p, o, s, d) -> 0;
+	}
 
 	public static class Combined implements MultiFunctionable {
 		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
+		private final Pusher unSequenced = new Pusher();
+
+		private void sequence() {
+			AtomicLong totalWeight = new AtomicLong(functions.keySet().stream().mapToLong(Integer::longValue).sum()), lastSequenced = new AtomicLong(0);
+			functions.entrySet().iterator().forEachRemaining(entry -> {
+				int weight = entry.getKey();
+				entry.setValue((p, o, s, d) -> {
+					if (p / d * totalWeight.get() >= lastSequenced.get() &&
+								(p / d * totalWeight.get() < lastSequenced.get() + weight || p == d))
+						return entry.getValue().apply(p - (double) lastSequenced.getAndAdd(weight) / totalWeight.get(), o, s, (double) weight / totalWeight.get());
+					else return QuadDoubleFunction.NONE.apply(p, o, s, d);
+				});
+			});
+		}
 
 		private QuadDoubleFunction current(double percentage) {
-			AtomicInteger totalWeight = new AtomicInteger(functions.keySet().stream().reduce(0, Integer::sum));
+			AtomicLong totalWeight = new AtomicLong(functions.keySet().stream().mapToLong(Integer::longValue).sum());
 			final int weight = (int) (percentage * totalWeight.get());
 			return functions.entrySet().stream().filter(entry -> {
 				totalWeight.addAndGet(-entry.getKey());
-				return totalWeight.get() <= weight;
-			}).findFirst().map(Map.Entry::getValue).orElse(NONE);
+				return totalWeight.get() <= totalWeight.get() - weight;
+			}).findFirst().map(Map.Entry::getValue).orElse(QuadDoubleFunction.NONE);
 		}
 
 		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
@@ -56,16 +72,17 @@ public class EasingFunctions {
 		}
 
 		public Combined append(int weight, @NotNull QuadDoubleFunction function) {
-			functions.put(weight, function);
+			unSequenced.push(() -> functions.put(weight, function));
 			return this;
 		}
 
 		public Combined appendNegate(int weight, @NotNull QuadDoubleFunction function) {
-			functions.put(weight, (p, o, s, d) -> function.apply(p, o, -s, d));
+			unSequenced.push(() -> functions.put(weight, (p, o, s, d) -> function.apply(p, o, -s, d)));
 			return this;
 		}
 
 		public double apply(double progress, double origin, double shift, double duration) {
+			unSequenced.pull(this::sequence);
 			return current(progress / duration).apply(progress, origin, shift, duration);
 		}
 	}
