@@ -1,5 +1,6 @@
 package net.krlite.equator.math;
 
+import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +37,7 @@ public class EasingFunctions {
 	 * @return The sinusoidal reciprocating value.
 	 */
 	public static double sin() {
-		return Math.sin(System.currentTimeMillis() / 1000.0);
+		return Math.sin(SystemClock.queueElapsed() / 1000.0);
 	}
 
 	/**
@@ -46,7 +47,7 @@ public class EasingFunctions {
 	 * @return The cosine reciprocating value.
 	 */
 	public static double cos() {
-		return Math.cos(System.currentTimeMillis() / 1000.0);
+		return Math.cos(SystemClock.queueElapsed() / 1000.0);
 	}
 
 	/**
@@ -56,7 +57,7 @@ public class EasingFunctions {
 	 * @return The tangent reciprocating value.
 	 */
 	public static double tan() {
-		return Math.tan(System.currentTimeMillis() / 1000.0);
+		return Math.tan(SystemClock.queueElapsed() / 1000.0);
 	}
 
 	/**
