@@ -29,7 +29,7 @@ public class EasingFunctions {
 		}
 	}
 
-	protected interface QuadDoubleFunction {
+	public interface QuadDoubleFunction {
 		double apply(double a, double b, double c, double d);
 	}
 
