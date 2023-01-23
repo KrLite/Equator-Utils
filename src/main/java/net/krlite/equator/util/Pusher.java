@@ -73,9 +73,7 @@ public class Pusher {
 	 */
 	public boolean pull(@NotNull Runnable action) {
 		boolean pulled = pull();
-		if (pulled) {
-			action.run();
-		}
+		if (pulled) action.run();
 		return pulled;
 	}
 
@@ -89,9 +87,7 @@ public class Pusher {
 	 *                  flag is disposed.
 	 */
 	public void or(boolean or, @NotNull Runnable action) {
-		if (or || pull()) {
-			action.run();
-		}
+		if (or || pull()) action.run();
 	}
 
 	/**
@@ -104,9 +100,7 @@ public class Pusher {
 	 *                  flag is disposed.
 	 */
 	public void and(boolean and, @NotNull Runnable action) {
-		if (and && pull()) {
-			action.run();
-		}
+		if (and && pull()) action.run();
 	}
 
 	/**
@@ -121,9 +115,7 @@ public class Pusher {
 	 *                  <code>false</code>.
 	 */
 	public void safePull(@NotNull Runnable success, @NotNull Runnable failure) {
-		if (!pull(success)) {
-			failure.run();
-		}
+		if (!pull(success)) failure.run();
 	}
 
 	/**

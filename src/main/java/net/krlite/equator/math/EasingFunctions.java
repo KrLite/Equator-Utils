@@ -1,12 +1,12 @@
 package net.krlite.equator.math;
 
-import net.krlite.equator.util.Pusher;
 import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * A class that provides different kinds of easing functions.
  */
 public class EasingFunctions {
-	protected interface MultiFunctionable extends Cloneable {
+	protected interface MultiFunctionable {
 		double apply(double progress, double origin, double shift, double duration);
 
 		default double apply(double percentage) {
@@ -32,56 +32,60 @@ public class EasingFunctions {
 
 	@FunctionalInterface
 	public interface QuadDoubleFunction {
-		double apply(double a, double b, double c, double d);
+		double apply(double p, double o, double s, double d);
 
 		QuadDoubleFunction NONE = (p, o, s, d) -> 0;
 	}
 
+	protected static class Pair<F, S> {
+		private final F first;
+		private final S second;
+
+		public Pair(F first, S second) {
+			this.first = first;
+			this.second = second;
+		}
+
+		public F getFirst() {
+			return first;
+		}
+
+		public S getSecond() {
+			return second;
+		}
+	}
+
 	public static class Combined implements MultiFunctionable {
 		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
-		private final Pusher unSequenced = new Pusher();
 
-		private void sequence() {
-			AtomicLong totalWeight = new AtomicLong(functions.keySet().stream().mapToLong(Integer::longValue).sum()), lastSequenced = new AtomicLong(0);
-			functions.entrySet().iterator().forEachRemaining(entry -> {
-				int weight = entry.getKey();
-				entry.setValue((p, o, s, d) -> {
-					double current = p / d;
-					if (current * totalWeight.get() >= lastSequenced.get() &&
-								(current * totalWeight.get() < lastSequenced.get() + weight || current == 1))
-						return entry.getValue().apply(current * totalWeight.get() - lastSequenced.getAndAdd(weight), o, s, weight);
-					else return QuadDoubleFunction.NONE.apply(p, o, s, d);
-				});
-			});
+		private long getTotalWeight() {
+			return functions.keySet().stream().mapToLong(Integer::longValue).sum();
 		}
 
 		private QuadDoubleFunction current(double percentage) {
-			AtomicLong totalWeight = new AtomicLong(0);
-			final int weight = (int) (percentage * totalWeight.get());
-			return functions.entrySet().stream().filter(entry -> totalWeight.addAndGet(entry.getKey()) >= weight)
-						   .findFirst().map(Map.Entry::getValue).orElse(QuadDoubleFunction.NONE);
-		}
-
-		protected Combined(@NotNull Map<Integer, QuadDoubleFunction> functions) {
-			this.functions = functions;
+			AtomicLong accumulatedWeight = new AtomicLong(0);
+			final long totalWeight = getTotalWeight();
+			final double percentageWeight = percentage * totalWeight;
+			return functions.entrySet().stream().filter(entry -> accumulatedWeight.addAndGet(entry.getKey()) >= percentageWeight)
+						   .findFirst().map(entry -> (QuadDoubleFunction) (p, o, s, d) ->
+											  entry.getValue().apply((percentageWeight - (accumulatedWeight.get() - entry.getKey())) / ((double) entry.getKey() / totalWeight), o, s, totalWeight)
+						   ).orElse(QuadDoubleFunction.NONE);
 		}
 
 		public Combined() {
-			this(new HashMap<>());
+			this.functions = new HashMap<>();
 		}
 
 		public Combined append(int weight, @NotNull QuadDoubleFunction function) {
-			unSequenced.push(() -> functions.put(weight, function));
+			functions.put(weight, function);
 			return this;
 		}
 
 		public Combined appendNegate(int weight, @NotNull QuadDoubleFunction function) {
-			unSequenced.push(() -> functions.put(weight, (p, o, s, d) -> function.apply(p, o, -s, d)));
-			return this;
+			return append(weight, (p, o, s, d) -> function.apply(p, o, -s, d));
 		}
 
 		public double apply(double progress, double origin, double shift, double duration) {
-			unSequenced.pull(this::sequence);
 			return current(progress / duration).apply(progress, origin, shift, duration);
 		}
 	}
