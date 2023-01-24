@@ -7,7 +7,7 @@ This library provides a set of utilities, not only can be used in rendering but 
 
 The easiest way of implementing this library is to use **[JitPack.](https://jitpack.io/#KrLite/Equator-Utils)**
 
-Add the followings to your `build.gradle:`
+Add the content below to your `build.gradle:`
 
 ```groovy
 repositories {
