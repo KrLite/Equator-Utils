@@ -11,12 +11,12 @@ Add the followings to your `build.gradle:`
 
 ```groovy
 repositories {
-	maven { url 'https://jitpack.io' }
+	maven { url "https://jitpack.io" }
 }
 
 dependencies {
-	implementation 'com.github.KrLite:Equator-Utils:v{x}'
+	implementation "com.github.KrLite:Equator-Utils:v{x}"
 }
 ```
 
-> The `{x}` above should be replaced by the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of Equator Utils.
+> The `v{x}` above should be replaced by the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of **Equator Utils.**
