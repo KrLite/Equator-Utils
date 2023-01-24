@@ -56,19 +56,19 @@ public class EasingFunctions {
 	}
 
 	public static class Combined implements MultiFunctionable {
-		private @NotNull final Map<Integer, QuadDoubleFunction> functions;
+		private @NotNull final Map<QuadDoubleFunction, Integer> functions;
 
 		private long getTotalWeight() {
-			return functions.keySet().stream().mapToLong(Integer::longValue).sum();
+			return functions.values().stream().mapToLong(Integer::longValue).sum();
 		}
 
 		private QuadDoubleFunction current(double percentage) {
 			AtomicLong accumulatedWeight = new AtomicLong(0);
 			final long totalWeight = getTotalWeight();
 			final double percentageWeight = percentage * totalWeight;
-			return functions.entrySet().stream().filter(entry -> accumulatedWeight.addAndGet(entry.getKey()) >= percentageWeight)
+			return functions.entrySet().stream().filter(entry -> accumulatedWeight.addAndGet(entry.getValue()) >= percentageWeight)
 						   .findFirst().map(entry -> (QuadDoubleFunction) (p, o, s, d) ->
-											  entry.getValue().apply((percentageWeight - (accumulatedWeight.get() - entry.getKey())) / ((double) entry.getKey() / totalWeight), o, s, totalWeight)
+											  entry.getKey().apply((percentageWeight - (accumulatedWeight.get() - entry.getValue())) / ((double) entry.getValue() / totalWeight), o, s, totalWeight)
 						   ).orElse(QuadDoubleFunction.NONE);
 		}
 
@@ -76,13 +76,13 @@ public class EasingFunctions {
 			this.functions = new HashMap<>();
 		}
 
-		public Combined append(int weight, @NotNull QuadDoubleFunction function) {
-			functions.put(weight, function);
+		public Combined append(@NotNull QuadDoubleFunction function, int weight) {
+			functions.put(function, weight);
 			return this;
 		}
 
-		public Combined appendNegate(int weight, @NotNull QuadDoubleFunction function) {
-			return append(weight, (p, o, s, d) -> function.apply(p, o + s, -s, d));
+		public Combined appendNegate(@NotNull QuadDoubleFunction function, int weight) {
+			return append((p, o, s, d) -> function.apply(p, o + s, -s, d), weight);
 		}
 
 		public double apply(double progress, double origin, double shift, double duration) {
