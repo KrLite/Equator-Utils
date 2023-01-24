@@ -15,8 +15,8 @@ repositories {
 }
 
 dependencies {
-	implementation 'com.github.KrLite:Equator-Utils:xxx'
+	implementation 'com.github.KrLite:Equator-Utils:v{x}'
 }
 ```
 
-> The `xxx` above should be replaced by the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of Equator Utils.
+> The `{x}` above should be replaced by the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of Equator Utils.
