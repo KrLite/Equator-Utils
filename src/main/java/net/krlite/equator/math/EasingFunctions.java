@@ -4,9 +4,10 @@ import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -32,52 +33,40 @@ public class EasingFunctions {
 
 	@FunctionalInterface
 	public interface QuadDoubleFunction {
-		double apply(double p, double o, double s, double d);
+		double apply(double progress, double origin, double shift, double duration);
 
 		QuadDoubleFunction NONE = (p, o, s, d) -> 0;
 	}
 
-	protected static class Pair<F, S> {
-		private final F first;
-		private final S second;
-
-		public Pair(F first, S second) {
-			this.first = first;
-			this.second = second;
-		}
-
-		public F getFirst() {
-			return first;
-		}
-
-		public S getSecond() {
-			return second;
+	protected record Pair<F, S>(F first, S second) {
+		public Pair<S, F> swap() {
+			return new Pair<>(second, first);
 		}
 	}
 
 	public static class Combined implements MultiFunctionable {
-		private @NotNull final Map<QuadDoubleFunction, Integer> functions;
+		private @NotNull final List<Pair<QuadDoubleFunction, Integer>> functions;
 
 		private long getTotalWeight() {
-			return functions.values().stream().mapToLong(Integer::longValue).sum();
+			return functions.stream().mapToInt(Pair::second).sum();
 		}
 
 		private QuadDoubleFunction current(double percentage) {
 			AtomicLong accumulatedWeight = new AtomicLong(0);
 			final long totalWeight = getTotalWeight();
 			final double percentageWeight = percentage * totalWeight;
-			return functions.entrySet().stream().filter(entry -> accumulatedWeight.addAndGet(entry.getValue()) >= percentageWeight)
+			return functions.stream().filter(entry -> accumulatedWeight.addAndGet(entry.second) >= percentageWeight)
 						   .findFirst().map(entry -> (QuadDoubleFunction) (p, o, s, d) ->
-											  entry.getKey().apply((percentageWeight - (accumulatedWeight.get() - entry.getValue())) / ((double) entry.getValue() / totalWeight), o, s, totalWeight)
+											  entry.first.apply((percentageWeight - (accumulatedWeight.get() - entry.second)) / (entry.second.doubleValue() / totalWeight), o, s, totalWeight)
 						   ).orElse(QuadDoubleFunction.NONE);
 		}
 
 		public Combined() {
-			this.functions = new HashMap<>();
+			this.functions = new ArrayList<>();
 		}
 
 		public Combined append(@NotNull QuadDoubleFunction function, int weight) {
-			functions.put(function, weight);
+			functions.add(new Pair<>(function, weight));
 			return this;
 		}
 
