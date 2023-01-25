@@ -2,6 +2,11 @@ package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.core.BasicAnimator;
 
+/**
+ * An animator that can be used to animate long values.
+ *
+ * @see DoubleAnimator
+ */
 public class LongAnimator implements BasicAnimator<Long> {
 	private final DoubleAnimator animator;
 

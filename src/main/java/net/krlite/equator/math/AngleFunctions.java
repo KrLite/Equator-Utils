@@ -1,4 +1,4 @@
-package net.krlite.equator.function;
+package net.krlite.equator.math;
 
 /**
  * <h2>Angle Functions</h2>
@@ -6,12 +6,11 @@ package net.krlite.equator.function;
  */
 public class AngleFunctions {
     /**
-     * Solves the included angle between a <b>positive</b>
-     * angle and a <b>negative</b> angle.
-     * @param srcAngle  The source angle which is
-     *                  <b>positive</b>.
-     * @param dstAngle  The destination angle which is
-     *                  <b>negative</b>.
+     * Solves the included angle between a <b>positive</b> angle and a
+     * <b>negative</b> angle.
+     *
+     * @param srcAngle  The source angle which is <b>positive</b>.
+     * @param dstAngle  The destination angle which is <b>negative</b>.
      * @return          The included angle.
      */
     public static double positiveIncludeNegative(double srcAngle, double dstAngle) {
@@ -19,12 +18,10 @@ public class AngleFunctions {
     }
 
     /**
-     * Solves the included angle between two <b>positive</b>
-     * angles.
-     * @param srcAngle  The source angle which is
-     *                  <b>positive</b>.
-     * @param dstAngle  The destination angle which is
-     *                  <b>positive</b>.
+     * Solves the included angle between two <b>positive</b> angles.
+     *
+     * @param srcAngle  The source angle which is <b>positive</b>.
+     * @param dstAngle  The destination angle which is <b>positive</b>.
      * @return          The included angle.
      */
     public static double positiveIncludePositive(double srcAngle, double dstAngle) {
@@ -32,8 +29,8 @@ public class AngleFunctions {
     }
 
     /**
-     * Converts a <b>clockwise</b> angle to a <b>negative</b>
-     * angle.
+     * Converts a <b>clockwise</b> angle to a <b>negative</b> angle.
+     *
      * @param angle The angle which is <b>clockwise</b>.
      * @return      The corresponding <b>negative</b> angle.
      */
@@ -42,8 +39,8 @@ public class AngleFunctions {
     }
 
     /**
-     * Converts a <b>clockwise</b> angle to a <b>positive</b>
-     * angle.
+     * Converts a <b>clockwise</b> angle to a <b>positive</b> angle.
+     *
      * @param angle The angle which is <b>clockwise</b>.
      * @return      The corresponding <b>positive</b> angle.
      */
@@ -53,8 +50,8 @@ public class AngleFunctions {
     }
 
     /**
-     * Converts a <b>negative</b> angle to a <b>clockwise</b>
-     * angle.
+     * Converts a <b>negative</b> angle to a <b>clockwise</b> angle.
+     *
      * @param angle The angle which is <b>negative</b>.
      * @return      The corresponding <b>clockwise</b> angle.
      */
@@ -63,8 +60,8 @@ public class AngleFunctions {
     }
 
     /**
-     * Converts a <b>positive</b> angle to a <b>clockwise</b>
-     * angle.
+     * Converts a <b>positive</b> angle to a <b>clockwise</b> angle.
+     *
      * @param angle The angle which is <b>positive</b>.
      * @return      The corresponding <b>clockwise</b> angle.
      */
@@ -74,6 +71,7 @@ public class AngleFunctions {
 
     /**
      * Reverts an angle.
+     *
      * @param angle The angle to revert.
      * @return      The reverted angle.
      */
@@ -84,6 +82,7 @@ public class AngleFunctions {
 
     /**
      * Reverts an angle by <b>clockwise</b>.
+     *
      * @param angle The angle to revert.
      * @return      The reverted <b>clockwise</b> angle.
      */
@@ -93,6 +92,7 @@ public class AngleFunctions {
     
     /**
      * Opposites an angle.
+     *
      * @param angle The angle to opposite.
      * @return      The opposite <b>positive</b> angle.
      */
@@ -102,6 +102,7 @@ public class AngleFunctions {
 
     /**
      * Opposites an angle by <b>clockwise</b>
+     *
      * @param angle The angle to opposite.
      * @return      The opposite <b>clockwise</b> angle.
      */
@@ -111,6 +112,7 @@ public class AngleFunctions {
 
     /**
      * Molds the angle by <b>180</b>.
+     *
      * @param angle The angle to mold.
      * @return      The modulus.
      */
@@ -120,6 +122,7 @@ public class AngleFunctions {
 
     /**
      * Casts an angle to <b>negative: <code>[180, -180)</code></b>.
+     *
      * @param angle The angle to cast.
      * @return      The cast <b>negative</b> angle.
      */
@@ -133,6 +136,7 @@ public class AngleFunctions {
 
     /**
      * Casts an angle to <b>positive: <code>(-180, 180]</code></b>.
+     *
      * @param angle The angle to cast.
      * @return      The cast <b>positive</b> angle.
      */
@@ -143,6 +147,7 @@ public class AngleFunctions {
 
     /**
      * Casts an angle to <b>clockwise: <code>[0, 360)</code></b>.
+     *
      * @param angle The angle to cast.
      * @return      The cast <b>clockwise</b> angle.
      */

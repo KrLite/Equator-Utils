@@ -66,10 +66,18 @@ public class Timer implements OperatableVoid<Timer, Timer> {
 		if (isStepping()) this.stepping = false;
 	}
 
+	/**
+	 * Steps the timer if in stepping mode.
+	 *
+	 * @param step	The step to take.
+	 */
 	public void step(long step) {
 		if (isStepping()) this.lastStep += step;
 	}
 
+	/**
+	 *	Steps the timer by 1 if in stepping mode.
+	 */
 	public void step() {
 		step(1);
 	}

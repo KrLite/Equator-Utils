@@ -2,12 +2,10 @@ package net.krlite.equator.math;
 
 import net.krlite.equator.util.SystemClock;
 import net.krlite.equator.util.Timer;
+import net.krlite.equator.util.list.PairList;
+import net.krlite.equator.util.pair.Pair;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -31,66 +29,150 @@ public class EasingFunctions {
 		}
 	}
 
+	/**
+	 * A functional interface representing an operation
+	 * that processes 4 {@code double}-valued arguments and
+	 * produces a {@code double}-valued result.
+	 */
 	@FunctionalInterface
 	public interface QuadDoubleFunction {
+		/**
+		 * Applies the function to the given arguments.
+		 *
+		 * @param progress	The progress of the operation, relative to the
+		 *                 	duration.
+		 * @param origin	The origin of the operation.
+		 * @param shift		The shift of the operation.
+		 * @param duration	The duration of the operation.
+		 * @return			The function result.
+		 */
 		double apply(double progress, double origin, double shift, double duration);
 
+		/**
+		 * A {@link QuadDoubleFunction} that returns zero.
+		 */
 		QuadDoubleFunction NONE = (p, o, s, d) -> 0;
 	}
 
-	protected record Pair<F, S>(F first, S second) {
-		public Pair<S, F> swap() {
-			return new Pair<>(second, first);
-		}
-	}
-
+	/**
+	 * A class to combine multiple {@link QuadDoubleFunction}s.
+	 */
 	public static class Combined implements MultiFunctionable {
-		private @NotNull final List<Pair<QuadDoubleFunction, Integer>> functions;
+		/**
+		 * The {@link PairList} of {@link QuadDoubleFunction}s.
+		 */
+		private @NotNull final PairList<QuadDoubleFunction, Integer> functions;
 
+		/**
+		 * Gets the total weight.
+		 *
+		 * @return	The total weight.
+		 */
 		private long getTotalWeight() {
-			return functions.stream().mapToInt(Pair::second).sum();
+			return functions.stream().mapToInt(Pair::getSecond).sum();
 		}
 
+		/**
+		 * Queues the current {@link QuadDoubleFunction}.
+		 *
+		 * @param percentage	The percentage of the operation.
+		 * @return				The queued {@link QuadDoubleFunction}.
+		 */
 		private QuadDoubleFunction current(double percentage) {
 			AtomicLong accumulatedWeight = new AtomicLong(0);
 			final long totalWeight = getTotalWeight();
 			final double percentageWeight = percentage * totalWeight;
-			return functions.stream().filter(entry -> accumulatedWeight.addAndGet(entry.second) >= percentageWeight)
+			return functions.stream().filter(entry -> accumulatedWeight.addAndGet(entry.getSecond()) >= percentageWeight)
 						   .findFirst().map(entry -> (QuadDoubleFunction) (p, o, s, d) ->
-											  entry.first.apply((percentageWeight - (accumulatedWeight.get() - entry.second)) / (entry.second.doubleValue() / totalWeight), o, s, totalWeight)
+											  entry.getFirst().apply((percentageWeight - (accumulatedWeight.get() - entry.getSecond())) / (entry.getSecond().doubleValue() / totalWeight), o, s, totalWeight)
 						   ).orElse(QuadDoubleFunction.NONE);
 		}
 
+		/**
+		 * Creates a new {@link Combined} instance.
+		 */
 		public Combined() {
-			this.functions = new ArrayList<>();
+			this.functions = new PairList<>();
 		}
 
+		/**
+		 * Adds a {@link QuadDoubleFunction} to the {@link Combined}.
+		 *
+		 * @param function	The {@link QuadDoubleFunction} to add.
+		 * @param weight	The weight of the {@link QuadDoubleFunction}.
+		 * @return			The {@link Combined} instance.
+		 */
 		public Combined append(@NotNull QuadDoubleFunction function, int weight) {
 			functions.add(new Pair<>(function, weight));
 			return this;
 		}
 
+		/**
+		 * Adds a negate {@link QuadDoubleFunction} to the {@link Combined}.
+		 *
+		 * @param function	The {@link QuadDoubleFunction} to add, which will
+		 *                  be negated.
+		 * @param weight	The weight of the {@link QuadDoubleFunction}.
+		 * @return			The {@link Combined} instance.
+		 */
 		public Combined appendNegate(@NotNull QuadDoubleFunction function, int weight) {
 			return append((p, o, s, d) -> function.apply(p, o + s, -s, d), weight);
 		}
 
+		/**
+		 * Applies the function to the given arguments.
+		 *
+		 * @param progress	The progress of the operation, relative to the
+		 *                  duration.
+		 * @param origin	The origin of the operation.
+		 * @param shift		The shift of the operation.
+		 * @param duration	The duration of the operation.
+		 * @return			The function result.
+		 */
 		public double apply(double progress, double origin, double shift, double duration) {
 			return current(progress / duration).apply(progress, origin, shift, duration);
 		}
 	}
 
+	/**
+	 * A class to concur multiple {@link MultiFunctionable}s.
+	 */
 	public static class Concurred implements MultiFunctionable {
+		/**
+		 * The two {@link QuadDoubleFunction}s to concur.
+		 */
 		private final @NotNull QuadDoubleFunction functionFirst, functionSecond;
 
+		/**
+		 * Creates a new {@link Concurred} instance with two {@link QuadDoubleFunction}s.
+		 *
+		 * @param functionFirst		The first {@link QuadDoubleFunction}.
+		 * @param functionSecond	The second {@link QuadDoubleFunction}.
+		 */
 		public Concurred(@NotNull QuadDoubleFunction functionFirst, @NotNull QuadDoubleFunction functionSecond) {
 			this.functionFirst = functionFirst;
 			this.functionSecond = functionSecond;
 		}
 
+		/**
+		 * Creates a new {@link Concurred} instance with one {@link QuadDoubleFunction},
+		 * concurs with the negated self.
+		 * @param function	The {@link QuadDoubleFunction}.
+		 */
 		public Concurred(@NotNull QuadDoubleFunction function) {
 			this(function, (p, o, s, d) -> function.apply(d - p, o, s, d));
 		}
 
+		/**
+		 * Applies the function to the given arguments.
+		 *
+		 * @param progress	The progress of the operation, relative to the
+		 *                  duration.
+		 * @param origin	The origin of the operation.
+		 * @param shift		The shift of the operation.
+		 * @param duration	The duration of the operation.
+		 * @return			The function result.
+		 */
 		public double apply(double progress, double origin, double shift, double duration) {
 			return functionFirst.apply(progress, origin, shift, duration) + functionSecond.apply(progress, origin, shift, duration);
 		}
@@ -119,7 +201,7 @@ public class EasingFunctions {
 
 	/**
 	 * Sinusoidal reciprocating function based on the
-	 * system time, with a period of 1 second.
+	 * system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The sinusoidal reciprocating value.
@@ -128,13 +210,19 @@ public class EasingFunctions {
 		return Math.sin(SystemClock.queueElapsed() * 0.001 * speed);
 	}
 
+	/**
+	 * Sinusoidal reciprocating function based on the
+	 * system time, with a period of 1 second.
+	 *
+	 * @return	The sinusoidal reciprocating value.
+	 */
 	public static double sin() {
 		return sin(1);
 	}
 
 	/**
 	 * Cosine reciprocating function based on the
-	 * system time, with a period of 1 second.
+	 * system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The cosine reciprocating value.
@@ -143,13 +231,19 @@ public class EasingFunctions {
 		return Math.cos(SystemClock.queueElapsed() * 0.001 * speed);
 	}
 
+	/**
+	 * Cosine reciprocating function based on the
+	 * system time, with a period of 1 second.
+	 *
+	 * @return	The cosine reciprocating value.
+	 */
 	public static double cos() {
 		return cos(1);
 	}
 
 	/**
 	 * Tangent reciprocating function based on the
-	 * system time, with a period of 1 second.
+	 * system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The tangent reciprocating value.
@@ -158,14 +252,19 @@ public class EasingFunctions {
 		return Math.tan(SystemClock.queueElapsed() * 0.001 * speed);
 	}
 
+	/**
+	 * Tangent reciprocating function based on the
+	 * system time, with a period of 1 second.
+	 *
+	 * @return	The tangent reciprocating value.
+	 */
 	public static double tan() {
 		return tan(1);
 	}
 
 	/**
 	 * Sinusoidal reciprocating function (absolute
-	 * value) based on the system time, with a period
-	 * of 1 second.
+	 * value) based on the system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The sinusoidal reciprocating value.
@@ -174,14 +273,20 @@ public class EasingFunctions {
 		return Math.abs(sin(speed));
 	}
 
+	/**
+	 * Sinusoidal reciprocating function (absolute
+	 * value) based on the system time, with a period
+	 * of 1 second.
+	 *
+	 * @return	The sinusoidal reciprocating value.
+	 */
 	public static double sinPositive() {
 		return sinPositive(1);
 	}
 
 	/**
 	 * Cosine reciprocating function (absolute value)
-	 * based on the system time, with a period of 1
-	 * second.
+	 * based on the system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The cosine reciprocating value.
@@ -190,14 +295,20 @@ public class EasingFunctions {
 		return Math.abs(cos(speed));
 	}
 
+	/**
+	 * Cosine reciprocating function (absolute value)
+	 * based on the system time, with a period of 1
+	 * second.
+	 *
+	 * @return	The cosine reciprocating value.
+	 */
 	public static double cosPositive() {
 		return cosPositive(1);
 	}
 
 	/**
 	 * Sinusoidal reciprocating function (normal value
-	 * in [0, 1]) based on the system time, with a
-	 * period of 1 second.
+	 * in [0, 1]) based on the system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The sinusoidal reciprocating value.
@@ -206,14 +317,20 @@ public class EasingFunctions {
 		return sin(speed) / 2 + 0.5;
 	}
 
+	/**
+	 * Sinusoidal reciprocating function (normal value
+	 * in [0, 1]) based on the system time, with a
+	 * period of 1 second.
+	 *
+	 * @return	The sinusoidal reciprocating value.
+	 */
 	public static double sinNormal() {
 		return sinNormal(1);
 	}
 
 	/**
 	 * Cosine reciprocating function (normal value in
-	 * [0, 1]) based on the system time, with a period
-	 * of 1 second.
+	 * [0, 1]) based on the system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The cosine reciprocating value.
@@ -222,14 +339,20 @@ public class EasingFunctions {
 		return cos(speed) / 2 + 0.5;
 	}
 
+	/**
+	 * Cosine reciprocating function (normal value in
+	 * [0, 1]) based on the system time, with a period
+	 * of 1 second.
+	 *
+	 * @return	The cosine reciprocating value.
+	 */
 	public static double cosNormal() {
 		return cosNormal(1);
 	}
 
 	/**
 	 * Tangent reciprocating function (reciprocated,
-	 * divided by 1) based on the system time, with a
-	 * period of 1 second.
+	 * divided by 1) based on the system time.
 	 *
 	 * @param speed The speed of the reciprocation.
 	 * @return 		The tangent reciprocating value.
@@ -238,6 +361,13 @@ public class EasingFunctions {
 		return 1 / tan(speed);
 	}
 
+	/**
+	 * Tangent reciprocating function (reciprocated,
+	 * divided by 1) based on the system time, with a
+	 * period of 1 second.
+	 *
+	 * @return	The tangent reciprocating value.
+	 */
 	public static double tanReciprocal() {
 		return tanReciprocal(1);
 	}

@@ -6,8 +6,9 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
  * <h2>SystemClock</h2>
  * A class that provides the current system time in
  * milliseconds.
+ *
+ * @see System#currentTimeMillis()
  */
-@SuppressWarnings("allJavadoc")
 public class SystemClock {
 	/**
 	 * The volatile variable that stores the current

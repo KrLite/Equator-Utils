@@ -2,6 +2,11 @@ package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.base.ValueAnimator;
 
+/**
+ * An animator that can be used to animate float values.
+ *
+ * @see ValueAnimator
+ */
 public class FloatAnimator extends ValueAnimator<Float> {
 	public FloatAnimator(float start, float end, double delta) {
 		super(start, end, delta);

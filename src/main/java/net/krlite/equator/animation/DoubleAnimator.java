@@ -2,6 +2,11 @@ package net.krlite.equator.animation;
 
 import net.krlite.equator.animation.base.ValueAnimator;
 
+/**
+ * An animator that can be used to animate double values.
+ *
+ * @see ValueAnimator
+ */
 public class DoubleAnimator extends ValueAnimator<Double> {
 	public DoubleAnimator(double start, double end, double delta) {
 		super(start, end, delta);
