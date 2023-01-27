@@ -1204,7 +1204,7 @@ public class EasingFunctions {
 		 * @return The back out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return shift * (progress = progress / duration - 1) * progress * (2.70158 * progress + 1.70158) + 1 + origin;
+			return shift * ((progress = progress / duration - 1) * progress * (2.70158 * progress + 1.70158) + 1) + origin;
 		}
 	}
 
