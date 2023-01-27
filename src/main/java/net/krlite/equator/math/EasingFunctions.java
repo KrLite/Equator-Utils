@@ -1176,7 +1176,9 @@ public class EasingFunctions {
 		 * @return The back eased value.
 		 */
 		public static double ease(double progress, double origin, double shift, double duration) {
-			return shift * (progress /= duration) * progress * (2.70158 * progress - 1.70158) + origin;
+			return (progress /= (duration / 2)) < 1
+						   ? shift / 2 * (pow(progress) * ((1.70158 * 1.525 + 1) * progress - 1.70158 * 1.525)) + origin
+						   : shift / 2 * ((progress -= 2) * progress * ((1.70158 * 1.525 + 1) * progress + 1.70158 * 1.525) + 2) + origin;
 		}
 
 		/**
@@ -1189,7 +1191,7 @@ public class EasingFunctions {
 		 * @return The back in eased value.
 		 */
 		public static double easeIn(double progress, double origin, double shift, double duration) {
-			return shift * (progress = progress / duration - 1) * progress * (2.70158 * progress + 1.70158) + 1 + origin;
+			return shift * (progress /= duration) * progress * (2.70158 * progress - 1.70158) + origin;
 		}
 
 		/**
@@ -1202,9 +1204,7 @@ public class EasingFunctions {
 		 * @return The back out eased value.
 		 */
 		public static double easeOut(double progress, double origin, double shift, double duration) {
-			return (progress /= (duration / 2)) < 1
-						   ? shift / 2 * (pow(progress) * ((1.70158 * 1.525 + 1) * progress - 1.70158 * 1.525)) + origin
-						   : shift / 2 * ((progress -= 2) * progress * ((1.70158 * 1.525 + 1) * progress + 1.70158 * 1.525) + 2) + origin;
+			return shift * (progress = progress / duration - 1) * progress * (2.70158 * progress + 1.70158) + 1 + origin;
 		}
 	}
 
