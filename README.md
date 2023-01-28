@@ -19,4 +19,4 @@ dependencies {
 }
 ```
 
-> The `v{x}` above should be replaced by the latest [`tag name`](https://github.com/KrLite/Equator-Utils/tags) of **Equator Utils.**
+> The `v{x}` above should be replaced by the latest [`Jitpack version`](https://jitpack.io/#KrLite/Equator-Utils) of **Equator Utils.**
