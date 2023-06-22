@@ -1,3 +1,5 @@
+# Equator Utils is Deprecated as [Equator](https://github.com/KrLite/Equator-v2) Goes into Version 2.0+
+
 # Equator-Utils
 
 **Equator Utils** is the sub-library of **[Equator.](https://github.com/KrLite/Equator)**
